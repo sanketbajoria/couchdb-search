@@ -18,10 +18,9 @@
     ENV JAVA_VERSION_MAJOR=7 \
         JAVA_VERSION_MINOR=80 \
         JAVA_VERSION_BUILD=15 \
-        JAVA_PACKAGE=server-jre \
+        JAVA_PACKAGE=server-jre \       
         JAVA_HOME=/jre \
         PATH=${PATH}:/jre/bin \
-        LANG=C.UTF-8 \
         MAVEN_VERSION=3.3.3 \
         MAVEN_HOME=/usr/share/maven
 
@@ -137,7 +136,7 @@
     COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
     #USER couchdb
-    VOLUME ["/opt/couchdb/data", "/usr/src/clouseau/target"]
+    VOLUME ["/opt/couchdb/data", "/opt/couchdb/var/log", "/usr/src/clouseau/target"]
     EXPOSE 5984 15984 25984 35984 15986 25986 35986
     WORKDIR /opt/couchdb
 
