@@ -62,10 +62,9 @@
     && cd /usr/src && mkdir couchdb \
     && git clone -b dreyfus https://github.com/sanketbajoria/couchdb.git \
     && cd couchdb \
-    # Build the release and install into /opt
+    # Build couchdb
     && ./configure --disable-docs \
-    && make release \
-    && mv /usr/src/couchdb/rel/couchdb /opt/ \
+    && make \
     # Clone Clouseau
     && cd /usr/src \
     && git clone https://github.com/cloudant-labs/clouseau \
@@ -74,14 +73,10 @@
     && chmod +x /usr/src/clouseau && chown -R couchdb:couchdb /usr/src/clouseau \
     # Remove packages used only for build CouchDB
     && apt-get purge -y \
-        apt-transport-https \
-        ca-certificates \
-        curl \
         binutils \
         build-essential \
         cpp \
         erlang-dev \
-        erlang-reltool \
         git \
         libcurl4-openssl-dev \
         libicu-dev \
@@ -90,10 +85,9 @@
         make \
         nodejs \
         perl \
-        python \
     && apt-get autoremove -y && apt-get clean \
-    && apt-get install -y libicu52 haproxy supervisor libmozjs185-1.0 erlang-nox --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/* /usr/lib/node_modules src/**/.git .git /usr/src/couchdb* \
+    && apt-get install -y libicu52 --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/* /usr/lib/node_modules src/**/.git .git /usr/src/couchdb/src/fauxton \
     && rm -rf /jre/bin/jjs \
             /jre/bin/keytool \
             /jre/bin/orbd \
@@ -127,8 +121,10 @@
             /tmp/* \
     && find / -name .git -type d | xargs rm -rf \
     && find / -name .npm -type d | xargs rm -rf \
+    && find / -name node_modules -type d | xargs rm -rf \
+    && find / -name test -type d | xargs rm -rf \
     # permissions
-    && chmod +x /opt/couchdb/bin/couchdb && chown -R couchdb:couchdb /opt/couchdb \
+    && chmod +x /usr/src/couchdb/dev/run && chown -R couchdb:couchdb /usr/src/couchdb \
     && mkdir -p /var/log/supervisor/ \
     && chmod 755 /var/log/supervisor/
 
@@ -136,8 +132,8 @@
     COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
     #USER couchdb
-    VOLUME ["/opt/couchdb/data", "/opt/couchdb/var/log", "/usr/src/clouseau/target"]
+    VOLUME ["/usr/src/couchdb/dev/lib", "/usr/src/couchdb/dev/var/log", "/usr/src/clouseau/target"]
     EXPOSE 5984 15984 25984 35984 15986 25986 35986
-    WORKDIR /opt/couchdb
+    WORKDIR /usr/src/couchdb
 
     ENTRYPOINT ["/usr/bin/supervisord"]
