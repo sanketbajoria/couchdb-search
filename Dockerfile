@@ -69,7 +69,7 @@
     && cd /usr/src \
     && git clone https://github.com/cloudant-labs/clouseau \
     && cd /usr/src/clouseau \
-    #&& mvn -Dmaven.test.skip=true install \  
+    && mvn -Dmaven.test.skip=true install clean\
     && chmod +x /usr/src/clouseau && chown -R couchdb:couchdb /usr/src/clouseau \
     # Remove packages used only for build CouchDB
     && apt-get purge -y \
@@ -122,7 +122,7 @@
     && find / -name .git -type d | xargs rm -rf \
     && find / -name .npm -type d | xargs rm -rf \
     && find / -name node_modules -type d | xargs rm -rf \
-    && find / -name test -type d | xargs rm -rf \
+    && find /usr/src/couchdb -name test -type d | xargs rm -rf \
     # permissions
     && chmod +x /usr/src/couchdb/dev/run && chown -R couchdb:couchdb /usr/src/couchdb \
     && mkdir -p /var/log/supervisor/ \
@@ -132,8 +132,13 @@
     COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
     #USER couchdb
-    VOLUME ["/usr/src/couchdb/dev/lib", "/usr/src/couchdb/dev/var/log", "/usr/src/clouseau/target"]
+    VOLUME ["/usr/src/couchdb/dev/lib", "/usr/src/couchdb/var/log", "/usr/src/clouseau/target"]
     EXPOSE 5984 15984 25984 35984 15986 25986 35986
     WORKDIR /usr/src/couchdb
 
-    ENTRYPOINT ["/usr/bin/supervisord"]
+    #entrypoint
+    COPY docker-entrypoint.sh /docker-entrypoint.sh
+    RUN chmod +x /docker-entrypoint.sh
+
+    #ENTRYPOINT ["/usr/bin/supervisord"]
+    ENTRYPOINT ["/docker-entrypoint.sh"]
